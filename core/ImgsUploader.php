@@ -28,6 +28,7 @@
                     $path = $this->getPath($filename, $file_uuid, $folder_uuid);
                     $this->imgs[] = $path;
                     move_uploaded_file($this->files['tmp_name'][$i], "pics/" . $path);
+                    chmod("pics/" . $path, 0644);
                 }
             }
         }

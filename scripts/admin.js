@@ -70,7 +70,7 @@ async function saveData(table, id)
     try{
         jsonData = [];
         jsonData.push(table);
-        data = document.getElementsByClassName(`${table}_${id}`)
+        data = document.getElementsByClassName(`${table}_${id}`);
         Object.values(data).forEach(element => {
             jsonData.push(element.value);
         })
@@ -93,4 +93,207 @@ async function saveAllData()
     Object.values(saveButtons).forEach(button => {
         button.click();
     })
+}
+
+function getReportWork()
+{
+    fetch(`/lost_admin/admins/getReportsWork`)
+    .then(response => response.json())
+    .then(data => {
+        let reportComment = 0;
+        let comment = data.at(-1);
+        let reports = data.slice(0, -1);
+        workplace = document.getElementById('workplace');
+        workplace.innerHTML = "";
+
+        let workflow = document.createElement('div');
+        workflow.classList.add("workflow");
+
+        let commentBlock = document.createElement('div');
+        commentBlock.classList.add('comment_block');
+        commentBlock.id = "comment" + comment['id'];
+
+        let commentInfoBlock = document.createElement('div');
+        commentInfoBlock.classList.add('comment_info_block');
+
+        let commentTextInfoBlock = document.createElement('div');
+        commentTextInfoBlock.classList.add('comment_info_text_block');
+
+        let commentInfoText = document.createElement('p');
+        commentInfoText.classList.add('comment_info_text');
+
+        let commentRefToIland = document.createElement('a');
+        commentRefToIland.href = "/lost_island/discussion/index?thread_id=" + comment["thread_id"] + "#comment" + comment['id'];
+        commentRefToIland.innerHTML = comment['id'];
+        commentRefToIland.target = "_blank";
+
+        commentInfoText.innerHTML = "Анонімний коментар №";
+        commentInfoText.appendChild(commentRefToIland);
+        commentTextInfoBlock.appendChild(commentInfoText);
+        
+        if(comment['parent_comment_id'] != null)
+        {
+            let commentReplyTo = document.createElement('p');
+            commentReplyTo.classList.add('comment_info_text');
+            let refReplyedTo = document.createElement('a');
+            refReplyedTo.innerHTML = comment['parent_comment_id'];
+            commentReplyTo.innerHTML = " | відповідь на <";
+            commentReplyTo.appendChild(refReplyedTo);
+            commentReplyTo.innerHTML += ">";
+            commentTextInfoBlock.appendChild(commentReplyTo);
+        }
+
+        let commentInfoDate = document.createElement('p');
+        commentInfoDate.classList.add('comment_info_text');
+        commentInfoDate.innerHTML = " | " + comment['post_datetime'];
+        commentTextInfoBlock.appendChild(commentInfoDate);
+
+        commentInfoBlock.appendChild(commentTextInfoBlock);
+        commentBlock.appendChild(commentInfoBlock);
+
+        let imgsBlock = document.createElement('div');
+        imgsBlock.classList.add('imgs_block');
+
+        if(comment['imgs_refs'] != null)
+        {
+            let imgsArr = JSON.parse(comment["imgs_refs"]);
+            imgsArr.forEach((imgRef) => {
+                let div = document.createElement('div');
+
+                let imgContainer = document.createElement('div');
+                imgContainer.classList.add('img_container');
+                
+                let ext = imgRef.split(".")
+                if(imgRef.split(".")[1] == "mp4")
+                {
+                    let video = document.createElement('video');
+                    video.src = "/lost_island/pics/" + imgRef;
+                    video.alt = imgRef;
+                    imgContainer.appendChild(video);
+                    div.appendChild(imgContainer);
+                }
+                else
+                {
+                    let img = document.createElement('img');
+                    img.src = "/lost_island/pics/" + imgRef;
+                    img.alt = imgRef;
+                    imgContainer.appendChild(img);
+                }
+                
+
+                let video = document.createElement('video');
+                video.src = "/lost_island/pics/" + imgRef;
+                video.alt = imgRef;
+                div.appendChild(imgContainer);
+
+                let aImgRef = document.createElement('a');
+                aImgRef.classList.add('img_name_text');
+                let splitedRef = imgRef.split("/");
+                aImgRef.innerHTML = splitedRef[1];
+                aImgRef.href = "#";
+                div.appendChild(aImgRef);
+
+                imgsBlock.appendChild(div);
+            });
+            commentBlock.appendChild(imgsBlock);
+        }
+        let commentTextBlock = document.createElement('div');
+        commentTextBlock.classList.add('comment_text_block');
+
+        let commentText = document.createElement('p');
+        commentText.classList.add('comment_text');
+        commentText.innerHTML = comment['comment'].replace(/\r?\n/g, "<br>");
+        commentTextBlock.appendChild(commentText);
+
+        commentBlock.appendChild(commentTextBlock);
+    
+        workflow.appendChild(commentBlock);
+
+        let mainReportBlock = document.createElement('div');
+        mainReportBlock.id = "main_report_block";
+
+        let reportBlock = document.createElement('div');
+        reportBlock.id = 'report_block';
+
+        let buttonNext = document.createElement('button');
+        buttonNext.classList.add('changeButton');
+        buttonNext.onclick = function(){
+            reportComment++;
+            if(reportComment >= reports.length)
+                reportComment = 0;
+            showReportMessage(reports[reportComment]["reason"], reports[reportComment]["reported_at"])};
+        buttonNext.innerHTML = ">";
+
+        let buttonPrev = document.createElement('button');
+        buttonPrev.classList.add('changeButton');
+        buttonPrev.onclick = function(){
+            reportComment--;
+            if(reportComment < 0)
+                reportComment = reports.length - 1;
+            showReportMessage(reports[reportComment]["reason"], reports[reportComment]["reported_at"])};
+        buttonPrev.innerHTML = "<";
+
+        let buttonDelete = document.createElement('button');
+        buttonDelete.classList.add('delete_button');
+        buttonDelete.onclick = function(){deleteReportedMessage(comment["id"], true)}
+        buttonDelete.innerHTML = "Видалити";
+
+        let buttonIgnore = document.createElement('button');
+        buttonIgnore.classList.add('ignore_button');
+        buttonIgnore.onclick = function(){ignoreReportedMessage(comment["id"])}
+        buttonIgnore.innerHTML = "Ігнорувати";
+
+        let buttonsBlock = document.createElement('div');
+        buttonsBlock.classList.add("buttons_block");
+
+        mainReportBlock.appendChild(reportBlock);
+
+        buttonsBlock.appendChild(buttonPrev);
+        buttonsBlock.appendChild(buttonNext);
+        buttonsBlock.appendChild(buttonDelete);
+        buttonsBlock.appendChild(buttonIgnore);
+        mainReportBlock.appendChild(buttonsBlock);
+        workflow.appendChild(mainReportBlock);
+        
+        workplace.appendChild(workflow);
+    });
+}
+
+function showReportMessage(reportMessage, reported_at)
+{
+    let result = document.getElementById('report_block');
+    result.innerHTML = "";
+
+    let reportedAtBlock = document.createElement('div');
+    reportedAtBlock.classList.add("reported_at_block");
+    reportedAtBlock.innerHTML = reported_at;
+    result.appendChild(reportedAtBlock);
+
+    let messageBlock = document.createElement('div');
+    messageBlock.classList.add('message_block');
+    messageBlock.innerHTML = reportMessage;
+    result.appendChild(messageBlock);
+}
+
+async function deleteReportedMessage(id, isComment)
+{
+    try{
+        await fetch(`/lost_admin/admins/clearComment?id=${id}&is_comment=${isComment}`);
+        getReportWork();
+    }
+    catch(e){
+        console.error(e);
+    }
+    
+}
+
+async function ignoreReportedMessage(id)
+{
+    try{
+        await fetch(`/lost_admin/admins/ignoreReports?id=${id}`);
+        getReportWork();
+    }
+    catch(e){
+        console.error(e);
+    }
 }
