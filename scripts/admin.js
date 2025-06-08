@@ -2,6 +2,12 @@ async function getModelTable(tableName) {
     fetch(`/lost_admin/admins/getTable?tableName=${tableName}`)
         .then(response => response.json())
         .then(data => {
+            if (tableName == 'categories') {
+                document.getElementById("create_button").style.display = 'block';
+            }
+            else {
+                document.getElementById("create_button").style.display = 'none';
+            }
             workplace = document.getElementById('workplace');
             workplace.innerHTML = "";
             let table = document.createElement('table');
@@ -380,4 +386,29 @@ async function ignoreReportedMessage(id) {
     catch (e) {
         console.error(e);
     }
+}
+
+function showCreateModal() {
+    document.getElementById("create_modal_window").style.display = 'block';
+    document.getElementById("overlay").style.display = 'block';
+}
+
+function closeModal() {
+    document.getElementById("create_modal_window").style.display = 'none';
+    document.getElementById("overlay").style.display = 'none';
+    document.getElementById("new_category_input").value = "";
+}
+
+async function createCategory() {
+    categoryName = document.getElementById('new_category_input').value;
+
+    try {
+        await fetch(`/lost_admin/admins/createCategory?name=${categoryName}`);
+        await getModelTable('categories');
+    }
+    catch (e) {
+        console.error(e);
+    }
+
+    closeModal();
 }

@@ -199,5 +199,13 @@
             \models\Admins::LogoutAdmin();
             return $this->redirect('login');
         }
+
+        public function actionCreateCategory()
+        {
+            $db = \core\Core::get()->db;
+            $name = $this->get->name;
+
+            $db->insert("categories", ["name" => $name]);
+        }
     }
 ?>
