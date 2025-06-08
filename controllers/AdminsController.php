@@ -97,10 +97,14 @@
             $data = json_decode($input, true);
             $tableName = $data[0];
             $id = $data[1];
-            $keys = $db->select("INFORMATION_SCHEMA.COLUMNS", "COLUMN_NAME", ["TABLE_NAME" => $tableName]); //ORDER BY ORDINAL_POSITION
+            $keys = $db->select("INFORMATION_SCHEMA.COLUMNS", "COLUMN_NAME", ["TABLE_NAME" => $tableName], "ORDER BY ORDINAL_POSITION");
             $data = array_slice($data, 1);
             for($i = 1; $i < count($keys); $i++)
             {
+                if($data[$i] == "")
+                {
+                    $data[$i] = null;
+                }
                 $db->update("$tableName", [$keys[$i]['COLUMN_NAME'] => $data[$i]], ['id' => "$id"]);
             }
             exit;
