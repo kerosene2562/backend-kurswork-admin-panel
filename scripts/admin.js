@@ -1,266 +1,352 @@
-async function getModelTable(tableName)
-{
+async function getModelTable(tableName) {
     fetch(`/lost_admin/admins/getTable?tableName=${tableName}`)
-    .then(response => response.json())
-    .then(data => {
-        workplace = document.getElementById('workplace');
-        workplace.innerHTML = "";
-        let table = document.createElement('table');
-        table.id = "data_table"
-        let keys = Object.keys(data[0]);
-        keys.forEach(key => {
-            let th = document.createElement('th');
-            th.innerHTML = key;
-            th.classList.add('cell');
-            table.appendChild(th);
-        })
-        data.forEach(element => {
-            let tr = document.createElement('tr');
-            Object.values(element).forEach(value => {
-                let td = document.createElement('td');
-                let input = document.createElement('input');
-                input.value = value;
-                input.classList.add("inputData");
-                input.classList.add(tableName + "_" + element["id"]);
-                td.appendChild(input);
-                td.classList.add('cell');
-                tr.appendChild(td);
+        .then(response => response.json())
+        .then(data => {
+            workplace = document.getElementById('workplace');
+            workplace.innerHTML = "";
+            let table = document.createElement('table');
+            table.id = "data_table"
+            let keys = Object.keys(data[0]);
+            keys.forEach(key => {
+                let th = document.createElement('th');
+                th.innerHTML = key;
+                th.classList.add('cell');
+                table.appendChild(th);
             })
-            let saveActionButton = document.createElement("button");
-            saveActionButton.onclick = function(){ saveData(tableName, element['id']) };
-            saveActionButton.classList.add('actionButtonSave');
-            saveActionButton.innerHTML = "зберегти";
-            let tdSave = document.createElement('td');
-            tdSave.appendChild(saveActionButton);
-            tdSave.classList.add('cell');
-            tr.appendChild(tdSave);
+            data.forEach(element => {
+                let tr = document.createElement('tr');
+                Object.values(element).forEach(value => {
+                    let td = document.createElement('td');
+                    let input = document.createElement('input');
+                    input.value = value;
+                    input.classList.add("inputData");
+                    input.classList.add(tableName + "_" + element["id"]);
+                    td.appendChild(input);
+                    td.classList.add('cell');
+                    tr.appendChild(td);
+                })
+                let saveActionButton = document.createElement("button");
+                saveActionButton.onclick = function () { saveData(tableName, element['id']) };
+                saveActionButton.classList.add('actionButtonSave');
+                saveActionButton.innerHTML = "зберегти";
+                let tdSave = document.createElement('td');
+                tdSave.appendChild(saveActionButton);
+                tdSave.classList.add('cell');
+                tr.appendChild(tdSave);
 
-            let deleteActionButton = document.createElement("button");
-            deleteActionButton.onclick = function(){ deleteData(tableName, element['id']) };
-            deleteActionButton.classList.add('actionButtonDelete');
-            deleteActionButton.innerHTML = "видалити";
-            let tdDelete = document.createElement('td');
-            tdDelete.appendChild(deleteActionButton);
-            tdDelete.classList.add('cell');
-            tr.appendChild(tdDelete);
+                let deleteActionButton = document.createElement("button");
+                deleteActionButton.onclick = function () { deleteData(tableName, element['id']) };
+                deleteActionButton.classList.add('actionButtonDelete');
+                deleteActionButton.innerHTML = "видалити";
+                let tdDelete = document.createElement('td');
+                tdDelete.appendChild(deleteActionButton);
+                tdDelete.classList.add('cell');
+                tr.appendChild(tdDelete);
 
-            table.appendChild(tr);
-        });
-        workplace.appendChild(table);
-    })
+                table.appendChild(tr);
+            });
+            workplace.appendChild(table);
+        })
 }
 
-async function deleteData(table, id)
-{
+async function deleteData(table, id) {
     result = confirm("Ви певні, що хочете видалити поле " + id + " в таблиці " + table + "?");
-    if(result)
-    {
-        try{
+    if (result) {
+        try {
             await fetch(`/lost_admin/admins/deleteData?table=${table}&id=${id}`);
             await getModelTable(table);
         }
-        catch(error){
+        catch (error) {
             console.error(error);
         }
-    }    
+    }
 }
 
-async function saveData(table, id)
-{
-    try{
+async function saveData(table, id) {
+    try {
         jsonData = [];
         jsonData.push(table);
         data = document.getElementsByClassName(`${table}_${id}`);
         Object.values(data).forEach(element => {
             jsonData.push(element.value);
         })
-        await fetch(`/lost_admin/admins/saveData`,{
+        await fetch(`/lost_admin/admins/saveData`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify(jsonData)});
+            body: JSON.stringify(jsonData)
+        });
         await getModelTable(table);
     }
-    catch(error){
+    catch (error) {
         console.error(error);
-    }  
+    }
 }
 
-async function saveAllData()
-{
+async function saveAllData() {
     saveButtons = document.getElementsByClassName('actionButtonSave');
     Object.values(saveButtons).forEach(button => {
         button.click();
     })
 }
 
-function getReportWork()
-{
+function getReportWork() {
     fetch(`/lost_admin/admins/getReportsWork`)
-    .then(response => response.json())
-    .then(data => {
-        let reportComment = 0;
-        let comment = data.at(-1);
-        let reports = data.slice(0, -1);
-        workplace = document.getElementById('workplace');
-        workplace.innerHTML = "";
+        .then(response => response.json())
+        .then(data => {
+            let reportComment = 0;
+            let comment = data.at(-1);
+            let reports = data.slice(0, -1);
+            workplace = document.getElementById('workplace');
+            workplace.innerHTML = "";
 
-        let workflow = document.createElement('div');
-        workflow.classList.add("workflow");
+            let workflow = document.createElement('div');
+            workflow.classList.add("workflow");
 
-        let commentBlock = document.createElement('div');
-        commentBlock.classList.add('comment_block');
-        commentBlock.id = "comment" + comment['id'];
+            if ("title" in comment) {
+                commentBlock = createThreadReportWindow(comment);
+            }
+            else {
+                commentBlock = createCommentReportWindow(comment);
+            }
 
-        let commentInfoBlock = document.createElement('div');
-        commentInfoBlock.classList.add('comment_info_block');
+            workflow.appendChild(commentBlock);
 
-        let commentTextInfoBlock = document.createElement('div');
-        commentTextInfoBlock.classList.add('comment_info_text_block');
+            let mainReportBlock = document.createElement('div');
+            mainReportBlock.id = "main_report_block";
 
-        let commentInfoText = document.createElement('p');
-        commentInfoText.classList.add('comment_info_text');
+            let reportBlock = document.createElement('div');
+            reportBlock.id = 'report_block';
 
-        let commentRefToIland = document.createElement('a');
-        commentRefToIland.href = "/lost_island/discussion/index?thread_id=" + comment["thread_id"] + "#comment" + comment['id'];
-        commentRefToIland.innerHTML = comment['id'];
-        commentRefToIland.target = "_blank";
+            let buttonNext = document.createElement('button');
+            buttonNext.classList.add('changeButton');
+            buttonNext.onclick = function () {
+                reportComment++;
+                if (reportComment >= reports.length)
+                    reportComment = 0;
+                showReportMessage(reports[reportComment]["reason"], reports[reportComment]["reported_at"])
+            };
+            buttonNext.innerHTML = ">";
 
-        commentInfoText.innerHTML = "Анонімний коментар №";
-        commentInfoText.appendChild(commentRefToIland);
-        commentTextInfoBlock.appendChild(commentInfoText);
-        
-        if(comment['parent_comment_id'] != null)
-        {
-            let commentReplyTo = document.createElement('p');
-            commentReplyTo.classList.add('comment_info_text');
-            let refReplyedTo = document.createElement('a');
-            refReplyedTo.innerHTML = comment['parent_comment_id'];
-            commentReplyTo.innerHTML = " | відповідь на <";
-            commentReplyTo.appendChild(refReplyedTo);
-            commentReplyTo.innerHTML += ">";
-            commentTextInfoBlock.appendChild(commentReplyTo);
-        }
+            let buttonPrev = document.createElement('button');
+            buttonPrev.classList.add('changeButton');
+            buttonPrev.onclick = function () {
+                reportComment--;
+                if (reportComment < 0)
+                    reportComment = reports.length - 1;
+                showReportMessage(reports[reportComment]["reason"], reports[reportComment]["reported_at"])
+            };
+            buttonPrev.innerHTML = "<";
 
-        let commentInfoDate = document.createElement('p');
-        commentInfoDate.classList.add('comment_info_text');
-        commentInfoDate.innerHTML = " | " + comment['post_datetime'];
-        commentTextInfoBlock.appendChild(commentInfoDate);
+            let buttonDelete = document.createElement('button');
+            buttonDelete.classList.add('delete_button');
+            buttonDelete.onclick = function () { deleteReportedMessage(comment["id"], true) }
+            buttonDelete.innerHTML = "Видалити";
 
-        commentInfoBlock.appendChild(commentTextInfoBlock);
-        commentBlock.appendChild(commentInfoBlock);
+            let buttonIgnore = document.createElement('button');
+            buttonIgnore.classList.add('ignore_button');
+            buttonIgnore.onclick = function () { ignoreReportedMessage(comment["id"]) }
+            buttonIgnore.innerHTML = "Ігнорувати";
 
-        let imgsBlock = document.createElement('div');
-        imgsBlock.classList.add('imgs_block');
+            let buttonsBlock = document.createElement('div');
+            buttonsBlock.classList.add("buttons_block");
 
-        if(comment['imgs_refs'] != null)
-        {
-            let imgsArr = JSON.parse(comment["imgs_refs"]);
-            imgsArr.forEach((imgRef) => {
-                let div = document.createElement('div');
+            mainReportBlock.appendChild(reportBlock);
 
-                let imgContainer = document.createElement('div');
-                imgContainer.classList.add('img_container');
-                
-                let ext = imgRef.split(".")
-                if(imgRef.split(".")[1] == "mp4")
-                {
-                    let video = document.createElement('video');
-                    video.src = "/lost_island/pics/" + imgRef;
-                    video.alt = imgRef;
-                    imgContainer.appendChild(video);
-                    div.appendChild(imgContainer);
-                }
-                else
-                {
-                    let img = document.createElement('img');
-                    img.src = "/lost_island/pics/" + imgRef;
-                    img.alt = imgRef;
-                    imgContainer.appendChild(img);
-                }
-                
+            buttonsBlock.appendChild(buttonPrev);
+            buttonsBlock.appendChild(buttonNext);
+            buttonsBlock.appendChild(buttonDelete);
+            buttonsBlock.appendChild(buttonIgnore);
+            mainReportBlock.appendChild(buttonsBlock);
+            workflow.appendChild(mainReportBlock);
 
+            workplace.appendChild(workflow);
+        });
+}
+
+function createThreadReportWindow(thread) {
+    let commentBlock = document.createElement('div');
+    commentBlock.classList.add('comment_block');
+    commentBlock.id = "comment" + thread['id'];
+
+    let commentInfoBlock = document.createElement('div');
+    commentInfoBlock.classList.add('comment_info_block');
+
+    let commentTextInfoBlock = document.createElement('div');
+    commentTextInfoBlock.classList.add('comment_info_text_block');
+
+    let commentInfoText = document.createElement('p');
+    commentInfoText.classList.add('comment_info_text');
+
+    let commentRefToIland = document.createElement('a');
+    commentRefToIland.href = "/lost_island/discussion/index?thread_id=" + thread["id"];
+    commentRefToIland.innerHTML = thread['id'];
+    commentRefToIland.target = "_blank";
+
+    commentInfoText.innerHTML = "Тред №";
+    commentInfoText.appendChild(commentRefToIland);
+    commentTextInfoBlock.appendChild(commentInfoText);
+
+    let commentInfoDate = document.createElement('p');
+    commentInfoDate.classList.add('comment_info_text');
+    commentInfoDate.innerHTML = " | " + thread['created_at'];
+    commentTextInfoBlock.appendChild(commentInfoDate);
+
+    commentInfoBlock.appendChild(commentTextInfoBlock);
+    commentBlock.appendChild(commentInfoBlock);
+
+    let imgsBlock = document.createElement('div');
+    imgsBlock.classList.add('imgs_block');
+
+    if (thread['imgs_refs'] != null) {
+        let imgsArr = JSON.parse(thread["imgs_refs"]);
+        imgsArr.forEach((imgRef) => {
+            let div = document.createElement('div');
+
+            let imgContainer = document.createElement('div');
+            imgContainer.classList.add('img_container');
+
+            if (imgRef.split(".")[1] == "mp4") {
                 let video = document.createElement('video');
                 video.src = "/lost_island/pics/" + imgRef;
                 video.alt = imgRef;
+                imgContainer.appendChild(video);
                 div.appendChild(imgContainer);
+            }
+            else {
+                let img = document.createElement('img');
+                img.src = "/lost_island/pics/" + imgRef;
+                img.alt = imgRef;
+                imgContainer.appendChild(img);
+            }
 
-                let aImgRef = document.createElement('a');
-                aImgRef.classList.add('img_name_text');
-                let splitedRef = imgRef.split("/");
-                aImgRef.innerHTML = splitedRef[1];
-                aImgRef.href = "#";
-                div.appendChild(aImgRef);
+            let video = document.createElement('video');
+            video.src = "/lost_island/pics/" + imgRef;
+            video.alt = imgRef;
+            div.appendChild(imgContainer);
 
-                imgsBlock.appendChild(div);
-            });
-            commentBlock.appendChild(imgsBlock);
-        }
-        let commentTextBlock = document.createElement('div');
-        commentTextBlock.classList.add('comment_text_block');
+            let aImgRef = document.createElement('a');
+            aImgRef.classList.add('img_name_text');
+            let splitedRef = imgRef.split("/");
+            aImgRef.innerHTML = splitedRef[1];
+            aImgRef.href = "#";
+            div.appendChild(aImgRef);
 
-        let commentText = document.createElement('p');
-        commentText.classList.add('comment_text');
-        commentText.innerHTML = comment['comment'].replace(/\r?\n/g, "<br>");
-        commentTextBlock.appendChild(commentText);
+            imgsBlock.appendChild(div);
+        });
+        commentBlock.appendChild(imgsBlock);
+    }
+    let commentTextBlock = document.createElement('div');
+    commentTextBlock.classList.add('comment_text_block');
 
-        commentBlock.appendChild(commentTextBlock);
-    
-        workflow.appendChild(commentBlock);
+    let commentText = document.createElement('p');
+    commentText.classList.add('comment_text');
+    commentText.innerHTML = thread['description'].replace(/\r?\n/g, "<br>");
+    commentTextBlock.appendChild(commentText);
 
-        let mainReportBlock = document.createElement('div');
-        mainReportBlock.id = "main_report_block";
+    commentBlock.appendChild(commentTextBlock);
+    return commentBlock;
 
-        let reportBlock = document.createElement('div');
-        reportBlock.id = 'report_block';
-
-        let buttonNext = document.createElement('button');
-        buttonNext.classList.add('changeButton');
-        buttonNext.onclick = function(){
-            reportComment++;
-            if(reportComment >= reports.length)
-                reportComment = 0;
-            showReportMessage(reports[reportComment]["reason"], reports[reportComment]["reported_at"])};
-        buttonNext.innerHTML = ">";
-
-        let buttonPrev = document.createElement('button');
-        buttonPrev.classList.add('changeButton');
-        buttonPrev.onclick = function(){
-            reportComment--;
-            if(reportComment < 0)
-                reportComment = reports.length - 1;
-            showReportMessage(reports[reportComment]["reason"], reports[reportComment]["reported_at"])};
-        buttonPrev.innerHTML = "<";
-
-        let buttonDelete = document.createElement('button');
-        buttonDelete.classList.add('delete_button');
-        buttonDelete.onclick = function(){deleteReportedMessage(comment["id"], true)}
-        buttonDelete.innerHTML = "Видалити";
-
-        let buttonIgnore = document.createElement('button');
-        buttonIgnore.classList.add('ignore_button');
-        buttonIgnore.onclick = function(){ignoreReportedMessage(comment["id"])}
-        buttonIgnore.innerHTML = "Ігнорувати";
-
-        let buttonsBlock = document.createElement('div');
-        buttonsBlock.classList.add("buttons_block");
-
-        mainReportBlock.appendChild(reportBlock);
-
-        buttonsBlock.appendChild(buttonPrev);
-        buttonsBlock.appendChild(buttonNext);
-        buttonsBlock.appendChild(buttonDelete);
-        buttonsBlock.appendChild(buttonIgnore);
-        mainReportBlock.appendChild(buttonsBlock);
-        workflow.appendChild(mainReportBlock);
-        
-        workplace.appendChild(workflow);
-    });
 }
 
-function showReportMessage(reportMessage, reported_at)
-{
+function createCommentReportWindow(comment) {
+    let commentBlock = document.createElement('div');
+    commentBlock.classList.add('comment_block');
+    commentBlock.id = "comment" + comment['id'];
+
+    let commentInfoBlock = document.createElement('div');
+    commentInfoBlock.classList.add('comment_info_block');
+
+    let commentTextInfoBlock = document.createElement('div');
+    commentTextInfoBlock.classList.add('comment_info_text_block');
+
+    let commentInfoText = document.createElement('p');
+    commentInfoText.classList.add('comment_info_text');
+
+    let commentRefToIland = document.createElement('a');
+    commentRefToIland.href = "/lost_island/discussion/index?thread_id=" + comment["thread_id"] + "#comment" + comment['id'];
+    commentRefToIland.innerHTML = comment['id'];
+    commentRefToIland.target = "_blank";
+
+    commentInfoText.innerHTML = "Анонімний коментар №";
+    commentInfoText.appendChild(commentRefToIland);
+    commentTextInfoBlock.appendChild(commentInfoText);
+
+    if (comment['parent_comment_id'] != null) {
+        let commentReplyTo = document.createElement('p');
+        commentReplyTo.classList.add('comment_info_text');
+        let refReplyedTo = document.createElement('a');
+        refReplyedTo.innerHTML = comment['parent_comment_id'];
+        commentReplyTo.innerHTML = " | відповідь на <";
+        commentReplyTo.appendChild(refReplyedTo);
+        commentReplyTo.innerHTML += ">";
+        commentTextInfoBlock.appendChild(commentReplyTo);
+    }
+
+    let commentInfoDate = document.createElement('p');
+    commentInfoDate.classList.add('comment_info_text');
+    commentInfoDate.innerHTML = " | " + comment['post_datetime'];
+    commentTextInfoBlock.appendChild(commentInfoDate);
+
+    commentInfoBlock.appendChild(commentTextInfoBlock);
+    commentBlock.appendChild(commentInfoBlock);
+
+    let imgsBlock = document.createElement('div');
+    imgsBlock.classList.add('imgs_block');
+
+    if (comment['imgs_refs'] != null) {
+        let imgsArr = JSON.parse(comment["imgs_refs"]);
+        imgsArr.forEach((imgRef) => {
+            let div = document.createElement('div');
+
+            let imgContainer = document.createElement('div');
+            imgContainer.classList.add('img_container');
+
+            if (imgRef.split(".")[1] == "mp4") {
+                let video = document.createElement('video');
+                video.src = "/lost_island/pics/" + imgRef;
+                video.alt = imgRef;
+                imgContainer.appendChild(video);
+                div.appendChild(imgContainer);
+            }
+            else {
+                let img = document.createElement('img');
+                img.src = "/lost_island/pics/" + imgRef;
+                img.alt = imgRef;
+                imgContainer.appendChild(img);
+            }
+
+
+            let video = document.createElement('video');
+            video.src = "/lost_island/pics/" + imgRef;
+            video.alt = imgRef;
+            div.appendChild(imgContainer);
+
+            let aImgRef = document.createElement('a');
+            aImgRef.classList.add('img_name_text');
+            let splitedRef = imgRef.split("/");
+            aImgRef.innerHTML = splitedRef[1];
+            aImgRef.href = "#";
+            div.appendChild(aImgRef);
+
+            imgsBlock.appendChild(div);
+        });
+        commentBlock.appendChild(imgsBlock);
+    }
+    let commentTextBlock = document.createElement('div');
+    commentTextBlock.classList.add('comment_text_block');
+
+    let commentText = document.createElement('p');
+    commentText.classList.add('comment_text');
+    commentText.innerHTML = comment['comment'].replace(/\r?\n/g, "<br>");
+    commentTextBlock.appendChild(commentText);
+
+    commentBlock.appendChild(commentTextBlock);
+    return commentBlock;
+}
+
+function showReportMessage(reportMessage, reported_at) {
     let result = document.getElementById('report_block');
     result.innerHTML = "";
 
@@ -275,25 +361,23 @@ function showReportMessage(reportMessage, reported_at)
     result.appendChild(messageBlock);
 }
 
-async function deleteReportedMessage(id, isComment)
-{
-    try{
+async function deleteReportedMessage(id, isComment) {
+    try {
         await fetch(`/lost_admin/admins/clearComment?id=${id}&is_comment=${isComment}`);
         getReportWork();
     }
-    catch(e){
+    catch (e) {
         console.error(e);
     }
-    
+
 }
 
-async function ignoreReportedMessage(id)
-{
-    try{
+async function ignoreReportedMessage(id) {
+    try {
         await fetch(`/lost_admin/admins/ignoreReports?id=${id}`);
         getReportWork();
     }
-    catch(e){
+    catch (e) {
         console.error(e);
     }
 }

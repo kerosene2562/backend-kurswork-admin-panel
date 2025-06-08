@@ -15,7 +15,7 @@
             );
         }
 
-        public function select($table, $fields = "*", $where = null, $order_by = null, $join = null)
+        public function select($table, $fields = "*", $where = null, $order_by = null)
         {
             if(is_array($fields))
             {
@@ -35,7 +35,7 @@
             
             $where_string = $this->where($where);
 
-            $sql = "SELECT {$fields_string} FROM {$table} {$join} {$where_string} {$order_by}";
+            $sql = "SELECT {$fields_string} FROM {$table} {$where_string} {$order_by}";
             $sth = $this->pdo->prepare($sql);
             if(is_array($where))
             {

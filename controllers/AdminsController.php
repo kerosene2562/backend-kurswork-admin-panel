@@ -130,21 +130,23 @@
         {
             $db = \core\Core::get()->db;
             $reports = $db->select("reports", "*", ["is_checked" => 0]);
+            if(count($reports) == 0)
+                exit;
             foreach($reports as $report)
             {
-                $reportedComment = $db->select("discussion", "*", ["id" => $report["reported_id"]]);
-                if($reportedComment[0]["is_deleted"] == 1)
-                {
-                    continue;
+                $reportedData;
+
+                if($report["type"] == 'comment'){
+                    $reportedData = $db->select("discussion", "*", ["id" => $report["reported_id"], "is_deleted" => 0]);
                 }
-                else
-                {
-                    $result = $db->select("reports", "*", ["reported_id" => $report["reported_id"], "is_checked" => 0]);
-                    $result[] = $reportedComment[0];
-                    header('Content-Type: application/json');
-                    echo json_encode($result);
-                    exit;   
-                }
+                if($report["type"] == 'thread'){
+                    $reportedData = $db->select("threads", "*", ["id" => $report["reported_id"], "is_deleted" => 0]);
+                }                
+                $result = $db->select("reports", "*", ["reported_id" => $report["reported_id"], "is_checked" => 0]);
+                $result[] = $reportedData[0];
+                header('Content-Type: application/json');
+                echo json_encode($result);
+                exit;
             }
         }
 
