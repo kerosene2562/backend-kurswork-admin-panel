@@ -157,7 +157,7 @@
 
             $db = \core\Core::get()->db;
             
-            if($isComment)
+            if($isComment == "true")
             {
                 $db->update('discussion', ["is_deleted" => 1], ['id' => $id]);
                 $reports = $db->select('reports', "*", ["reported_id" => $id]);
@@ -168,7 +168,13 @@
             }
             else
             {
-                $db->delete('threads', ['id' => $id]);
+                $db->update('threads', ["is_deleted" => 1], ['id' => $id]);
+                $reports = $db->select('reports', "*", ["reported_id" => $id]);
+                var_dump($reports);
+                foreach($reports as $report)
+                {
+                    $db->update('reports', ["is_checked" => 1], ["reported_id" => $id]);
+                }
             }
         }
 

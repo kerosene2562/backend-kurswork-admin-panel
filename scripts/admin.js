@@ -147,7 +147,12 @@ function getReportWork() {
 
             let buttonDelete = document.createElement('button');
             buttonDelete.classList.add('delete_button');
-            buttonDelete.onclick = function () { deleteReportedMessage(comment["id"], true) }
+            if ("title" in comment) {
+                buttonDelete.onclick = function () { deleteReportedMessage(comment["id"], false) }
+            }
+            else {
+                buttonDelete.onclick = function () { deleteReportedMessage(comment["id"], true) }
+            }
             buttonDelete.innerHTML = "Видалити";
 
             let buttonIgnore = document.createElement('button');
@@ -201,6 +206,11 @@ function createThreadReportWindow(thread) {
 
     commentInfoBlock.appendChild(commentTextInfoBlock);
     commentBlock.appendChild(commentInfoBlock);
+
+    let titleBlock = document.createElement('div');
+    titleBlock.classList.add('title_block');
+    titleBlock.innerHTML = thread["title"];
+    commentBlock.appendChild(titleBlock);
 
     let imgsBlock = document.createElement('div');
     imgsBlock.classList.add('imgs_block');
@@ -397,6 +407,10 @@ function closeModal() {
     document.getElementById("create_modal_window").style.display = 'none';
     document.getElementById("overlay").style.display = 'none';
     document.getElementById("new_category_input").value = "";
+    document.getElementById('modal_media').style.display = 'none';
+    document.getElementById('media_video').style.display = 'none';
+    document.getElementById('media_video').pause();
+    document.getElementById('media_img').style.display = 'none';
 }
 
 async function createCategory() {
@@ -412,3 +426,28 @@ async function createCategory() {
 
     closeModal();
 }
+
+function showMedia(media) {
+    document.getElementById("modal_media").style.display = 'block';
+    document.getElementById('overlay').style.display = 'block';
+
+    if (media.src.split(".")[1] == "mp4") {
+        document.getElementById('media_video').style.display = 'block';
+        document.getElementById('media_video').src = media.src;
+        document.getElementById('bottom_info').innerHTML = "(" + media.videoWidth + "x" + media.videoHeight + ")";
+    }
+    else {
+        document.getElementById('media_img').style.display = 'block';
+        document.getElementById('media_img').src = media.src;
+        document.getElementById('bottom_info').innerHTML = "(" + media.naturalWidth + "x" + media.naturalHeight + ")";
+    }
+    let mediaRef = media.src.split("/");
+    document.getElementById('top_info').innerHTML = mediaRef[6];
+}
+
+document.querySelector('body').addEventListener('click', function (media) {
+    if (media.target.tagName === "IMG" || media.target.tagName === "VIDEO") {
+        showMedia(media.target);
+    }
+})
+

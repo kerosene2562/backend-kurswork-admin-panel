@@ -219,6 +219,10 @@ video {
     padding: 3px;
 }
 
+.title_block {
+    font-size: 20px;
+}
+
 #main_report_block {
     display: flex;
     width: 400px;
@@ -347,4 +351,42 @@ video {
 
 #create_category_button:hover {
     background-color: rgb(0, 193, 0);
+}
+
+
+#modal_media {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    width: auto;
+    height: auto;
+    max-width: 800px;
+    max-height: 700px;
+    background-color: rgb(54, 54, 54);
+    border-radius: 10px;
+    border: 1px solid grey;
+    display: none;
+    margin: 0;
+    padding: 0;
+    box-shadow: 0px 20px 40px black;
+    color: rgb(214, 214, 214);
+}
+
+.media_info {
+    height: 20px;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
+
+.media {
+    width: 100%;
+    height: 100%;
+    max-width: 800px;
+    max-height: 650px;
+    object-fit: contain;
+    display: none;
 }

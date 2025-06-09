@@ -10,6 +10,19 @@
     </div>
 </div>
 
+<div id="modal_media" onclick="closeModal()">
+    <div class="media_info">
+        <p id="top_info"></p>
+    </div>
+    <div id="img_container">
+        <img id="media_img" class="media" src="" alt="зображення">
+        <video id="media_video" class="media" controls width="300" autoplay></video>
+    </div>
+    <div class="media_info">
+        <p id="bottom_info"></p>
+    </div>
+</div>
+
 <div class="content">
     <div class="side_bar">
         <?php foreach($tables as $table) : ?>
