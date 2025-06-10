@@ -11,7 +11,7 @@
             }
             if($this->isPost)
             {
-                $admin = \models\Admins::FindByLoginAndPassword($this->post->login, $this->post->password);
+                $admin = \models\Admins::FindByLoginAndPassword($this->post->login, hash('sha512',$this->post->password));
                 if(!empty($admin))
                 {
                     \models\Admins::LoginAdmin($admin);
@@ -60,7 +60,7 @@
                     }
                     if(!$this->isErrorMessagesExist())
                     {
-                        \models\Admins::RegisterAdmin($this->post->login, $this->post->password1, $this->post->email);
+                        \models\Admins::RegisterAdmin($this->post->login, hash('sha512', $this->post->password1), $this->post->email);
                         return $this->redirect('/lost_admin/admins/login');
                     }
                 }
@@ -222,7 +222,7 @@
         {
             if($this->isPost)
             {
-                $setPassword = $this->post->password;
+                $setPassword = hash('sha512', $this->post->password);
                 $newPass1 = $this->post->password1;
                 $newPass2 = $this->post->password2;
                 $data = \core\Core::get()->session->get('admin');
@@ -230,7 +230,7 @@
                 {
                     $this->addErrorMessage('логін не вказано');
                 }
-                if($this->post->password != $data['password'])
+                if(hash('sha512', $this->post->password) != $data['password'])
                 {
                     $this->addErrorMessage('неправильний пароль!');
                 }
@@ -238,7 +238,7 @@
                 {
                     if($newPass2 == $newPass1)
                     {
-                        $setPassword = $this->post->password1;
+                        $setPassword = hash('sha512',$this->post->password1);
                     }
                     else
                     {
@@ -283,6 +283,11 @@
             $name = $this->get->name;
 
             $db->insert("categories", ["name" => $name]);
+        }
+
+        public function actionStats()
+        {
+            return $this->render();
         }
     }
 ?>

@@ -40,13 +40,20 @@
 
         public function getHTML()
         {
-            ob_start();
-            $this->controller = \core\Core::get()->controllerObject;
-            extract($this->paramsArray);
-            include($this->templateFilePath);
-            $str = ob_get_contents();
-            ob_end_clean();
-            return $str;
+            $core = \core\Core::get();
+            if(file_exists($this->templateFilePath))
+            {
+                ob_start();
+                $this->controller = $core->controllerObject;
+                extract($this->paramsArray);
+                include($this->templateFilePath);
+                $str = ob_get_contents();
+                ob_end_clean();
+                return $str;
+            }
+            else{
+                $core->error(404);
+            }
         }
 
         public function display()

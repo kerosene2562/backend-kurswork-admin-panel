@@ -29,6 +29,7 @@
             <button class="model_button" onclick="getModelTable('<?= $table ?>')"><?= $table ?></button>
         <?php endforeach; ?>
         <button class="model_button" onclick="getReportWork()">reports work</button>
+        <a href="/lost_admin/admins/stats"><button class="model_button">stats</button></a>
     </div>
     <div id="main_bar">
         <div id="toolbar">
