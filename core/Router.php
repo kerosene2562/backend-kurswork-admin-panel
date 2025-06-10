@@ -58,11 +58,17 @@
         public function error($code)
         {
             http_response_code($code);
-            switch($code)
+            \core\Core::log(http_response_code());
+            $path = "views/errorPage.php";
+            if(file_exists($path))
             {
-                case 404:
-                    echo '404 Not Found';
-                    break;
+                include_once($path);
             }
+            else
+            {
+                echo "Помилка {$code}";
+            }
+            
+            exit;
         }
     }

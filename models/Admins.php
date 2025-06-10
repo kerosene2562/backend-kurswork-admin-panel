@@ -46,12 +46,23 @@
             \core\Core::get()->session->remove('admin');
         }
 
-        public static function RegisterAdmin($login, $password, $mail)
+        public static function RegisterAdmin($login, $password, $email)
         {
             $admin = new \models\Admins();
             $admin->login = $login;
             $admin->password = $password;
-            $admin->mail = $mail;
+            $admin->email = $email;
+            $admin->save();
+        }
+
+        public static function UpdateAdmin($login, $password, $email)
+        {
+            $adminData = \core\Core::get()->session->get('admin');
+            $admin = new \models\Admins();
+            $admin->id = $adminData["id"];
+            $admin->login = $login;
+            $admin->password = $password;
+            $admin->email = $email;
             $admin->save();
         }
     }

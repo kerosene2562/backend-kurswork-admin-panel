@@ -19,71 +19,99 @@
                 }
                 else
                 {
-                    $this->setErrorMessage('неправильний логін або пароль!');
+                    $this->addErrorMessage('неправильний логін або пароль!');
                 }
             }
             return $this->render();
         }
 
-        public function actionRegister()
+        public function actionRegistr()
         {
-            if($this->isPost)
+            if(\models\Admins::IsAdminLogged())
             {
-                $admin = \models\Admins::FindByLogin($this->post->login);
-
-                if(!empty($admin))
+                if($this->isPost)
                 {
-                    $this->addErrorMessage('користувач з таким логіном вже існує');
+                    $admin = \models\Admins::FindByLogin($this->post->login);
+    
+                    if(!empty($admin))
+                    {
+                        $this->addErrorMessage('користувач з таким логіном вже існує');
+                    }
+                    
+                    if(strlen($this->post->login) == 0)
+                    {
+                        $this->addErrorMessage('логін не вказано');
+                    }
+                    if($this->post->password1 != $this->post->password2)
+                    {
+                        $this->addErrorMessage('паролі не співпадають');
+                    }
+                    if(strlen($this->post->password1) == 0)
+                    {
+                        $this->addErrorMessage('пароль не вказано');
+                    }
+                    if(strlen($this->post->password2) == 0)
+                    {
+                        $this->addErrorMessage('повторний пароль не вказано');
+                    }
+                    if(strlen($this->post->email) == 0)
+                    {
+                        $this->addErrorMessage('пошту не вказано');
+                    }
+                    if(!$this->isErrorMessagesExist())
+                    {
+                        \models\Admins::RegisterAdmin($this->post->login, $this->post->password1, $this->post->email);
+                        return $this->redirect('/lost_admin/admins/login');
+                    }
                 }
-                
-                if(strlen($this->post->login) == 0)
-                {
-                    $this->addErrorMessage('логін не вказано');
-                }
-                if($this->post->password != $this->post->password2)
-                {
-                    $this->addErrorMessage('паролі не співпадають');
-                }
-                if(strlen($this->post->password) == 0)
-                {
-                    $this->addErrorMessage('пароль не вказано');
-                }
-                if(strlen($this->post->password2) == 0)
-                {
-                    $this->addErrorMessage('повторний пароль не вказано');
-                }
-                if(strlen($this->post->email) == 0)
-                {
-                    $this->addErrorMessage('пошту не вказано');
-                }
-                if(!$this->isErrorMessagesExist())
-                {
-                    \models\Admins::RegisterAdmin($this->post->login, $this->post->password, $this->post->email);
-                    return $this->redirect('/lost_admin/admins/login');
-                }
+                return $this->render();
             }
-            return $this->render();
+            else{
+                return $this->redirect('/lost_admin/admins/login');
+            }
+            
         }
 
         public function actionIndex()
         {
-            $tables = [];
-            foreach(array_diff(scandir("models/"), array("..", ".")) as $table)
+            if(\models\Admins::IsAdminLogged())
             {
-                $tables[] = pathinfo(strtolower($table), PATHINFO_FILENAME);
-            }
-            $this->template->setParam("tables", $tables);
-            
+                $tables = [];
+                foreach(array_diff(scandir("models/"), array("..", ".")) as $table)
+                {
+                    $tables[] = pathinfo(strtolower($table), PATHINFO_FILENAME);
+                }
+                $this->template->setParam("tables", $tables);
+                
 
-            return $this->render();
+                return $this->render();
+            }
+            else{
+                return $this->redirect('/lost_admin/admins/login');
+            }
+            
         }
 
         public function actionGetTable()
         {
             $tableName = $this->get->tableName;
+            $order_by = $this->get->order_by;
+            $sortDirection = $this->get->direction;
             $db = \core\Core::get()->db;
-
-            $tableData = $db->select("{$tableName}", "*");
+            $order_by_string = "";
+            if($order_by != "null")
+            {
+                $order_by_string = "ORDER BY " . $order_by; 
+                if($sortDirection == 'asc')
+                {
+                    $order_by_string .= " ASC";
+                }
+                else{
+                    $order_by_string .= " DESC";
+                }
+            }
+            
+            $tableData = $db->select("{$tableName}", "*", null, $order_by_string);
 
             header('Content-Type: application/json');
             echo json_encode($tableData);
@@ -192,7 +220,50 @@
 
         public function actionProfile()
         {
-            return $this->render();
+            if($this->isPost)
+            {
+                $setPassword = $this->post->password;
+                $newPass1 = $this->post->password1;
+                $newPass2 = $this->post->password2;
+                $data = \core\Core::get()->session->get('admin');
+                if(strlen($this->post->login) == 0)
+                {
+                    $this->addErrorMessage('логін не вказано');
+                }
+                if($this->post->password != $data['password'])
+                {
+                    $this->addErrorMessage('неправильний пароль!');
+                }
+                if($newPass1 != "" || $newPass2 != "")
+                {
+                    if($newPass2 == $newPass1)
+                    {
+                        $setPassword = $this->post->password1;
+                    }
+                    else
+                    {
+                        $this->addErrorMessage('нові паролі не збігаються');
+                    }
+                }
+                
+                if(strlen($this->post->email) == 0)
+                {
+                    $this->addErrorMessage('пошту не вказано');
+                }
+                if(!$this->isErrorMessagesExist())
+                {
+                    \models\Admins::UpdateAdmin($this->post->login, $setPassword, $this->post->email);
+                    \models\Admins::LoginAdmin(\models\Admins::FindByLogin($this->post->login));
+
+                }
+            }
+            if(\models\Admins::IsAdminLogged()){
+                $data = \core\Core::get()->session->get('admin');
+
+                $this->template->setParams(['data' => $data]);
+
+                return $this->render();
+            }            
         }
 
         public function actionRegisterSuccess()

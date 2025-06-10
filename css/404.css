@@ -1,0 +1,55 @@
+body,
+html {
+    padding: 0;
+    margin: 0;
+    height: 100vh;
+    width: 100%;
+}
+
+.content {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background-color: rgb(31, 31, 31);
+}
+
+.info_block {
+    width: 700px;
+    height: min-content;
+    background-color: rgb(54, 54, 54);
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    border-radius: 10px;
+    padding: 20px;
+}
+
+.img_container {
+    width: 100%;
+    height: 300px;
+}
+
+#img_vault_boy {
+    width: 400px;
+    height: 300px;
+}
+
+.error {
+    font-size: 40px;
+    margin: 0;
+    color: rgb(214, 214, 214);
+}
+
+.text {
+    margin: 0;
+    font-size: 20px;
+    color: rgb(214, 214, 214);
+}
+
+#main_ref {
+    color: rgb(206, 134, 0);
+    text-decoration: none;
+}

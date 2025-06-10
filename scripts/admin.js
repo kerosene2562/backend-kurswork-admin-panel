@@ -1,5 +1,22 @@
-async function getModelTable(tableName) {
-    fetch(`/lost_admin/admins/getTable?tableName=${tableName}`)
+document.getElementById('search').oninput = function () {
+    getModelTable(currentTable);
+}
+
+let currentDirection = 'asc';
+let currentColumn = null;
+
+async function getModelTable(tableName, order_by = null) {
+    if (order_by && order_by === currentColumn) {
+        currentDirection = currentDirection === 'asc' ? 'desc' : 'asc';
+    }
+    else {
+        currentDirection = 'asc';
+    }
+    currentColumn = order_by;
+
+    currentTable = tableName;
+    let search = document.getElementById('search').value;
+    fetch(`/lost_admin/admins/getTable?tableName=${tableName}&order_by=${order_by}&direction=${currentDirection}`)
         .then(response => response.json())
         .then(data => {
             if (tableName == 'categories') {
@@ -17,9 +34,19 @@ async function getModelTable(tableName) {
                 let th = document.createElement('th');
                 th.innerHTML = key;
                 th.classList.add('cell');
+                th.onclick = function () { getModelTable(tableName, key) };
                 table.appendChild(th);
             })
-            data.forEach(element => {
+
+            let searchedData = data.filter((element) => {
+                return Object.values(element).some(value => {
+                    if (value != null)
+                        return value.toString().toLowerCase().includes(search.toLowerCase());
+                    return false;
+                })
+            })
+
+            searchedData.forEach(element => {
                 let tr = document.createElement('tr');
                 Object.values(element).forEach(value => {
                     let td = document.createElement('td');
@@ -37,7 +64,6 @@ async function getModelTable(tableName) {
                 saveActionButton.innerHTML = "зберегти";
                 let tdSave = document.createElement('td');
                 tdSave.appendChild(saveActionButton);
-                tdSave.classList.add('cell');
                 tr.appendChild(tdSave);
 
                 let deleteActionButton = document.createElement("button");

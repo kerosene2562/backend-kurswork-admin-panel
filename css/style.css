@@ -82,6 +82,7 @@ body {
 }
 
 .actionButtonSave {
+    display: none;
     border: 1px solid black;
     border-radius: 10px;
     background-color: rgb(125, 177, 114);

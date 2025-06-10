@@ -33,17 +33,8 @@
                 </ul>
                 <?php if(\models\Admins::IsAdminLogged()) : ?>
                     <div class="dropdown text-end">
-                        <a href="#" class="d-block link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                            <?php if(\models\Admins::IsAdminLogged()) : ?>
-                                <img src="" alt="mdo" width="32" height="32" class="rounded-circle">
-                            <?php endif;?>
-                        </a>
-                        
-                        <ul class="dropdown-menu text-small" style="">
-                            <li><a class="dropdown-item" href="/lost_admin/admins/profile">Profile</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="/lost_admin/admins/logout">Sign out</a></li>
-                        </ul>
+                        <a class="dropdown-item" href="/lost_admin/admins/profile">Profile</a>
+                        <a class="dropdown-item" href="/lost_admin/admins/logout">Sign out</a>
                     </div>
                 <?php endif; ?>
             </div>

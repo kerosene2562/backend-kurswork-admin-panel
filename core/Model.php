@@ -24,23 +24,15 @@
 
         public function save()
         {
-            $isInsert = false;
-            if(!isset($this->{static::$primaryKey}))
-                $isInsert = true;
-            else
-            {
-                $value = $this->{static::$primaryKey};
-                if(empty($value))
-                    $isInsert = true;
-            }
-                
-            if($isInsert)
+            if(empty($this->fieldsArray[static::$primaryKey]))
             {
                 Core::get()->db->insert(static::$tableName, $this->fieldsArray);
             }
             else
             {
-                Core::get()->db->update(static::$tableName, $this->fieldsArray, [static::$primaryKey => $this->{static::$primaryKey}]);
+                Core::get()->db->update(static::$tableName, $this->fieldsArray, [
+                    static::$primaryKey => $this->{static::$primaryKey}
+                ]);
             }
         }
         
