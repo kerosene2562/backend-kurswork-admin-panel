@@ -10,7 +10,7 @@
     </div>
 </div>
 
-<div id="modal_media" onclick="closeModal()">
+<div id="modal_media">
     <div class="media_info">
         <p id="top_info"></p>
     </div>
@@ -18,7 +18,7 @@
         <img id="media_img" class="media" src="" alt="зображення">
         <video id="media_video" class="media" controls width="300" autoplay></video>
     </div>
-    <div class="media_info">
+    <div class="media_info" onclick="closeModal()">
         <p id="bottom_info"></p>
     </div>
 </div>

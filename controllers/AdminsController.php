@@ -287,7 +287,37 @@
 
         public function actionStats()
         {
+            $db = \core\Core::get()->db;
+
+            $post = $db->select("logger", "*", ["method" => "POST"]);
+            $this->template->setParam("post", count($post));
+
+            $get = $db->select("logger", "*", ["method" => "GET"]);
+            $this->template->setParam("get", count($get));
+
+            $reports = $db->select("reports", "*", null, "WHERE reported_at >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH)");
+            $this->template->setParam("reports", count($reports));
+
+            $countOfTreads = $db->select("threads", "*");
+            $this->template->setParam("countOfTreads", count($countOfTreads));
+            
+            $threadsPerMonth = $db->select("threads", "*", null, "WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH)");
+            $this->template->setParam("threadsPerMonth", count($threadsPerMonth));
+
+            $commentsPerMonth = $db->select("discussion", "*", null, "WHERE post_datetime >= DATE_SUB(CURDATE(), INTERVAL 1 MONTH)");
+            $this->template->setParam("commentsPerMonth", count($commentsPerMonth));
+
             return $this->render();
+        }
+
+        public function actionGetStats()
+        {
+            $db = \core\Core::get()->db;
+            
+            $data = $db->select('logger', ["status_code", "created_at"]);
+            header('Content-Type: application/json');
+            echo json_encode($data);
+            exit;
         }
     }
 ?>

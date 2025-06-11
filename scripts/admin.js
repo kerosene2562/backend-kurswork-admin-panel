@@ -130,6 +130,7 @@ function getReportWork() {
             let reportComment = 0;
             let comment = data.at(-1);
             let reports = data.slice(0, -1);
+
             workplace = document.getElementById('workplace');
             workplace.innerHTML = "";
 
@@ -199,6 +200,8 @@ function getReportWork() {
             workflow.appendChild(mainReportBlock);
 
             workplace.appendChild(workflow);
+
+            showReportMessage(reports[reportComment]["reason"], reports[reportComment]["reported_at"]);
         });
 }
 
@@ -477,3 +480,30 @@ document.querySelector('body').addEventListener('click', function (media) {
     }
 })
 
+/////////////      move modal media window
+let keyPressed = false;
+let offsetX = 0;
+let offsetY = 0;
+let modalWindow = document.getElementById('modal_media');
+modalWindow.addEventListener('mousedown', (event) => {
+    let clientWindow = modalWindow.getBoundingClientRect();
+    modalWindow.style.top = `${clientWindow.top}px`;
+    modalWindow.style.left = `${clientWindow.left}px`;
+    modalWindow.style.position = 'fixed';
+    modalWindow.style.transform = 'none';
+    keyPressed = true;
+    offsetX = event.clientX - clientWindow.left;
+    offsetY = event.clientY - clientWindow.top;
+})
+
+modalWindow.addEventListener('mouseup', (event) => {
+    keyPressed = false;
+})
+
+document.body.addEventListener('mousemove', (event) => {
+    if (keyPressed) {
+        modalWindow.style.top = `${event.clientY - offsetY}px`;
+        modalWindow.style.left = `${event.clientX - offsetX}px`;
+    }
+})
+/////////////
