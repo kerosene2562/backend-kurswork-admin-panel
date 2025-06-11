@@ -32,10 +32,15 @@
                 if($this->isPost)
                 {
                     $admin = \models\Admins::FindByLogin($this->post->login);
-    
+                    $email = \models\Admins::FindByEmail($this->post->email);
+                    
                     if(!empty($admin))
                     {
                         $this->addErrorMessage('користувач з таким логіном вже існує');
+                    }
+                    if(!empty($email))
+                    {
+                        $this->addErrorMessage('користувач з такою поштою вже існує');
                     }
                     
                     if(strlen($this->post->login) == 0)
@@ -82,7 +87,7 @@
                     $tables[] = pathinfo(strtolower($table), PATHINFO_FILENAME);
                 }
                 $this->template->setParam("tables", $tables);
-                
+                    
 
                 return $this->render();
             }
@@ -281,8 +286,23 @@
         {
             $db = \core\Core::get()->db;
             $name = $this->get->name;
-
-            $db->insert("categories", ["name" => $name]);
+            
+            $sameCategorie = $db->select('categories', "*", ["name" => ucfirst($name)]);
+            if(count($sameCategorie) > 0)
+            {
+                $error = 'Дана категорія вже існує!';
+                header('Content-Type: application/json');
+                echo json_encode($error);
+                exit;
+            }
+            if(strlen($name) < 2)
+            {
+                $error = 'Назва категорії повинна бути довшою за 2 символи!';
+                header('Content-Type: application/json');
+                echo json_encode($error);
+                exit;
+            }
+            $db->insert("categories", ["name" => ucfirst($name)]);
         }
 
         public function actionStats()

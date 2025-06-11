@@ -37,6 +37,7 @@
             <button id="create_button" onclick="showCreateModal()">Створити</button>
             <button id="save_button" onclick="saveAllData()">зберегти зміни</button>
         </div>
+        <div class="alert alert-danger" role="alert" id="alert" style="display: none"></div>
         <div id="workplace">
 
         </div>

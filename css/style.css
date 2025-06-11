@@ -390,3 +390,23 @@ video {
     object-fit: contain;
     display: none;
 }
+
+.spoiler {
+    color: black;
+    background-color: black;
+}
+
+.spoiler a {
+    color: black;
+    background-color: black;
+}
+
+.spoiler:hover {
+    color: rgb(214, 214, 214);
+    background-color: transparent;
+}
+
+.spoiler a:hover {
+    color: orange;
+    background-color: transparent;
+}

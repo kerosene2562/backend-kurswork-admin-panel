@@ -2,6 +2,8 @@ document.getElementById('search').oninput = function () {
     getModelTable(currentTable);
 }
 
+window.addEventListener("load", () => { getModelTable('admins') });
+
 let currentDirection = 'asc';
 let currentColumn = null;
 
@@ -446,13 +448,16 @@ async function createCategory() {
     categoryName = document.getElementById('new_category_input').value;
 
     try {
-        await fetch(`/lost_admin/admins/createCategory?name=${categoryName}`);
-        await getModelTable('categories');
+        await fetch(`/lost_admin/admins/createCategory?name=${categoryName}`)
+            .then(response => response.json())
+            .then(data => {
+                alert(data);
+            })
     }
     catch (e) {
         console.error(e);
     }
-
+    getModelTable('categories');
     closeModal();
 }
 

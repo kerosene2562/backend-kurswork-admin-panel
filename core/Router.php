@@ -12,41 +12,49 @@
 
         public function run()
         {
-            $parts = explode('/', $this->route);
-
-            if(strlen($parts[0]) == 0)
+            try
             {
-                $parts[0] = 'site';
-                $parts[1] = 'index'; 
-            }
-            if(count($parts) == 1)
-            {
-                $parts[1] = 'index';
-            }
+                $parts = explode('/', $this->route);
 
-            \core\Core::get()->moduleName = $parts[0];
-            \core\Core::get()->actionName = $parts[1];
-
-            $controller = 'controllers\\'.ucfirst($parts[0]).'Controller';
-            $method = 'action'.ucfirst($parts[1]);
-            
-            if(class_exists($controller))
-            {
-                $controllerObject = new $controller();
-                \core\Core::get()->controllerObject = $controllerObject;
-                if(method_exists($controllerObject, $method))
+                if(strlen($parts[0]) == 0)
                 {
-                    array_splice($parts, 0, 2);
-                    return $controllerObject->$method($parts);
+                    $parts[0] = 'site';
+                    $parts[1] = 'index'; 
+                }
+                if(count($parts) == 1)
+                {
+                    $parts[1] = 'index';
+                }
+
+                \core\Core::get()->moduleName = $parts[0];
+                \core\Core::get()->actionName = $parts[1];
+
+                $controller = 'controllers\\'.ucfirst($parts[0]).'Controller';
+                $method = 'action'.ucfirst($parts[1]);
+                
+                if(class_exists($controller))
+                {
+                    $controllerObject = new $controller();
+                    \core\Core::get()->controllerObject = $controllerObject;
+                    if(method_exists($controllerObject, $method))
+                    {
+                        array_splice($parts, 0, 2);
+                        return $controllerObject->$method($parts);
+                    }
+                    else
+                    {
+                        $this->error(404);
+                    }
                 }
                 else
                 {
                     $this->error(404);
                 }
             }
-            else
-            {
-                $this->error(404);
+            catch (\Throwable $e) {
+                ob_end_clean();
+                $code = $e->getCode() ?: 500;
+                \core\Core::get()->error($code);
             }
         }
 

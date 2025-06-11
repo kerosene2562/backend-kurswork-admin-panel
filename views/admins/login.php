@@ -3,11 +3,12 @@
 ?>
 
 <link rel="stylesheet" href="/lost_admin/css/login.css">
+<div id="video_block">
+  <video id="background_video" src="/lost_admin/assets/images/login_background.mp4" muted></video>
+</div>
+<div class="login_block_glass"></div>
 <div class="login_content">
   <div class="login_block">
-    <div class="img_block">
-        <img src="/lost_admin/assets/images/login_boy.gif" alt="login_boy" class="img_login_boy">
-    </div>
     <form method = "POST">
       <?php if(!empty($error_message)) : ?>
         <div class="alert alert-danger" role="alert">
@@ -26,3 +27,6 @@
     </form>
   </div>
 </div>
+<script>
+  document.getElementById('background_video').play();
+</script>

@@ -4,6 +4,7 @@ html {
     height: 100%;
     padding: 0;
     margin: 0;
+    overflow: hidden;
 }
 
 .login_content {
@@ -15,15 +16,31 @@ html {
     text-align: center;
 }
 
+.login_block_glass {
+    position: absolute;
+    top: 220px;
+    left: 370px;
+    width: 700px;
+    height: 320px;
+    background-color: rgb(54, 54, 54);
+    border-radius: 10px;
+    opacity: 0.95;
+    filter: blur(5px);
+    box-shadow: 0px 0px 15px 20px rgb(54, 54, 54);
+}
+
 .login_block {
     width: 700px;
     height: min-content;
-    background-color: rgb(54, 54, 54);
+    background-color: transparent;
     justify-content: center;
     align-items: center;
     text-align: center;
     border-radius: 10px;
     padding: 20px;
+    padding-top: 170px;
+    opacity: 1;
+    filter: blur(0px);
 }
 
 .img_block {
@@ -74,4 +91,20 @@ html {
 
 .loginButton:hover {
     background-color: rgb(0, 193, 0);
+}
+
+
+#video_block {
+    position: absolute;
+    width: 1300px;
+    height: 900px;
+    object-fit: fill;
+}
+
+#background_video {
+    position: absolute;
+    top: -130px;
+    left: -45px;
+    max-width: 1500px;
+    max-height: 900px;
 }

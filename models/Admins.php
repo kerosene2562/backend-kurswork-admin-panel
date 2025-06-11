@@ -31,6 +31,19 @@
             }
         }
 
+        public static function FindByEmail($email)
+        {
+            $rows = self::findByCondition(['email' => $email]);
+            if(!empty($rows))
+            {
+                return $rows[0];
+            }
+            else
+            {
+                return null;
+            }
+        }
+
         public static function IsAdminLogged()
         {
             return !empty(\core\Core::get()->session->get('admin'));
