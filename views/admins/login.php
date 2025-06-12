@@ -1,5 +1,5 @@
 <?php
-    $this->Title = 'вхід в адміна';
+    $this->Title = 'логін';
 ?>
 
 <link rel="stylesheet" href="/lost_admin/css/login.css">

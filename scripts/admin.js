@@ -4,23 +4,29 @@ document.getElementById('search').oninput = function () {
 
 window.addEventListener("load", () => { getModelTable('admins') });
 
-let currentDirection = 'asc';
-let currentColumn = null;
-
-async function getModelTable(tableName, order_by = null) {
+function changeSort(order_by) {
     if (order_by && order_by === currentColumn) {
         currentDirection = currentDirection === 'asc' ? 'desc' : 'asc';
-    }
-    else {
+    } else if (order_by) {
         currentDirection = 'asc';
     }
-    currentColumn = order_by;
+}
 
+let currentDirection = 'asc';
+let currentColumn = null;
+let currentPage = 0;
+let elementPerPage = 10;
+
+async function getModelTable(tableName, order_by = null, page = 0) {
+    currentPage = page;
+
+    currentColumn = order_by;
     currentTable = tableName;
     let search = document.getElementById('search').value;
     fetch(`/lost_admin/admins/getTable?tableName=${tableName}&order_by=${order_by}&direction=${currentDirection}`)
         .then(response => response.json())
         .then(data => {
+            let pagedData = data.slice(page * elementPerPage, page * elementPerPage + elementPerPage);
             if (tableName == 'categories') {
                 document.getElementById("create_button").style.display = 'block';
             }
@@ -36,17 +42,24 @@ async function getModelTable(tableName, order_by = null) {
                 let th = document.createElement('th');
                 th.innerHTML = key;
                 th.classList.add('cell');
-                th.onclick = function () { getModelTable(tableName, key) };
+                th.onclick = function () { changeSort(order_by); getModelTable(tableName, key, currentPage) };
                 table.appendChild(th);
             })
 
-            let searchedData = data.filter((element) => {
-                return Object.values(element).some(value => {
-                    if (value != null)
-                        return value.toString().toLowerCase().includes(search.toLowerCase());
-                    return false;
+            let searchedData = null;
+            if (search != "") {
+                searchedData = data.filter((element) => {
+                    return Object.values(element).some(value => {
+                        if (value != null)
+                            return value.toString().toLowerCase().includes(search.toLowerCase());
+                        return false;
+                    })
                 })
-            })
+            }
+            else {
+                searchedData = pagedData;
+            }
+
 
             searchedData.forEach(element => {
                 let tr = document.createElement('tr');
@@ -80,6 +93,28 @@ async function getModelTable(tableName, order_by = null) {
                 table.appendChild(tr);
             });
             workplace.appendChild(table);
+
+            let paginationBlock = document.createElement('div');
+            let backButton = document.createElement('button');
+            backButton.innerHTML = "<";
+            backButton.onclick = () => getModelTable(tableName, order_by, --currentPage);
+            backButton.classList.add('paginationButton');
+            paginationBlock.appendChild(backButton);
+            for (let i = 0; i < data.length / elementPerPage; i++) {
+                let pagButton = document.createElement('button');
+                pagButton.innerHTML = i;
+                if (currentPage == i)
+                    pagButton.disabled = true;
+                pagButton.onclick = () => getModelTable(tableName, order_by, i);
+                pagButton.classList.add('paginationButton');
+                paginationBlock.appendChild(pagButton);
+            }
+            let nextButton = document.createElement('button');
+            nextButton.innerHTML = ">";
+            nextButton.onclick = () => getModelTable(tableName, order_by, ++currentPage);
+            nextButton.classList.add('paginationButton');
+            paginationBlock.appendChild(nextButton);
+            workplace.appendChild(paginationBlock);
         })
 }
 

@@ -410,3 +410,11 @@ video {
     color: orange;
     background-color: transparent;
 }
+
+.paginationButton {
+    background-color: gray;
+    border-radius: 5px;
+    font-size: 12px;
+    width: 25px;
+    height: 25px;
+}
